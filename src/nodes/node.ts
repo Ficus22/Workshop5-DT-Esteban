@@ -16,9 +16,30 @@ export async function node(
   node.use(express.json());
   node.use(bodyParser.json());
 
+  type NodeState = {
+    killed: boolean; // this is used to know if the node was stopped by the /stop route. It's important for the unit tests but not very relevant for the Ben-Or implementation
+    x: 0 | 1 | "?" | null; // the current consensus value
+    decided: boolean | null; // used to know if the node reached finality
+    k: number | null; // current step of the node
+  };
+
+   // État initial du nœud
+   let nodeState: NodeState = {
+    killed: false,
+    x: isFaulty ? null : initialValue,
+    decided: isFaulty ? null : false,
+    k: isFaulty ? null : 0
+  };
+
   // TODO implement this
   // this route allows retrieving the current status of the node
-  // node.get("/status", (req, res) => {});
+  node.get("/status", (req, res) => {
+    if (isFaulty) {
+      res.status(500).send("faulty");
+    } else {
+      res.status(200).send("live");
+    }
+  });
 
   // TODO implement this
   // this route allows the node to receive messages from other nodes
@@ -34,7 +55,9 @@ export async function node(
 
   // TODO implement this
   // get the current state of a node
-  // node.get("/getState", (req, res) => {});
+  node.get("/getState", (req, res) => {
+    res.json(nodeState);
+  });
 
   // start the server
   const server = node.listen(BASE_NODE_PORT + nodeId, async () => {
