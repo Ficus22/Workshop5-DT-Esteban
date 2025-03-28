@@ -8,7 +8,5 @@ export async function launchNetwork(
   faultyList: boolean[]
 ) {
   // launch all nodes
-  const nodes = await launchNodes(N, F, initialValues, faultyList);
-
-  return nodes;
+  return await launchNodes(N, F, initialValues, faultyList);
 }
